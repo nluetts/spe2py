@@ -4,16 +4,11 @@ This module imports a Princeton Instruments LightField (SPE 3.0) file into a pyt
 """
 import numpy as np
 import untangle
-import tkinter as tk
-from tkinter import filedialog as fdialog
 from io import StringIO
-#import matplotlib
-#matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
-
-def get_files(mult=False):
+def get_files_tk(mult=False):
     """
     Uses tkinter to allow UI source file selection
     Adapted from: http://stackoverflow.com/a/7090747
@@ -32,13 +27,27 @@ def get_files(mult=False):
     return filepaths
 
 
+def get_files_input(mult=False):
+    if mult:
+        return input("Input path(s) to SPE file (separated by ';'): ").split(";")
+    else:
+        return input("Input path to SPE: ")
+
+try:
+    import tkinter as tk
+    from tkinter import filedialog as fdialog
+    get_files = get_files_tk
+except ImportError:
+    get_files = get_files_input
+
+
 class SpeFile:
     def __init__(self, filepath=None):
         if filepath is not None:
             assert isinstance(filepath, str), 'Filepath must be a single string'
             self.filepath = filepath
         else:
-            self.filepath = get_files()
+            self.filepath = get_files(mult=False)
 
         with open(self.filepath) as file:
             self.header_version = read_at(file, 1992, 3, np.float32)[0]
